@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>E</title>
+	</head>
+	<style>
+		.editor {
+			white-space: pre;
+		}
+	</style>
+	<body>
+		<h1>Editor</h1>
+		<div class="editor"></div>
+		<script>
+			let fs = require('fs')
+			let file = fs.readFileSync('./index.html', 'utf8')
+
+			let editor = document.querySelector('.editor')
+			editor.textContent = file
+
+			document.designMode = 'on'
+
+			// cannot be seen
+//			console.log('file', file)
+
+			// does not work
+//			win.showDevTools()
+
+			window.addEventListener('keydown', e => {
+				if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
+					&& e.keyCode == 83
+				) {
+					e.preventDefault()
+
+					fs.writeFileSync('index.html', editor.textContent, 'utf8')
+					alert('saved')
+  				}
+			})
+		</script>
+	</body>
+</html>
+
