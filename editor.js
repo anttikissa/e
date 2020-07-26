@@ -1,7 +1,12 @@
 let fs = require('fs')
-let file = fs.readFileSync('./editor.js', 'utf8')
+let path = require('path')
 
-document.title = 'editor.js'
+let filename = './editor.js'
+let file = fs.readFileSync(filename, 'utf8')
+
+let humanReadableFilename = path.normalize(filename)
+
+document.title = humanReadableFilename
 
 let editor = document.querySelector('.editor.classic')
 editor.value = file
@@ -32,8 +37,8 @@ window.addEventListener('keydown', function(e) {
 	) {
 		e.preventDefault()
 
-		fs.writeFileSync('editor.js', editor.value, 'utf8')
-		alert('editor.js saved')
+		fs.writeFileSync(filename, editor.value, 'utf8')
+		alert(humanReadableFilename + ' saved')
 	}
 })
 
