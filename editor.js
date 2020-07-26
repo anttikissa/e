@@ -56,5 +56,49 @@ function initClassicEditor(filename, selector) {
 	})
 }
 
+function initNewEditor(filename, selector) {
+	let file = fs.readFileSync(filename, 'utf8')
+	let humanReadableFilename = path.normalize(filename)
+
+	let editor = document.querySelector(selector)
+	editor.textContent = file
+
+	editor.focus()
+
+	let gotFocus = () => {
+		log(`editor ${filename}: got focus`)
+		document.title = humanReadableFilename
+		globals.editorInFocus = editor
+	}
+
+	editor.addEventListener('focus', gotFocus)
+	editor.focus()
+	gotFocus()
+
+	// tab inserts a tab instead of the usual
+	editor.addEventListener('keydown', function(e) {
+		if (e.keyCode === 9) {
+			e.preventDefault()
+			// TODO implement tab
+		}
+	})
+
+	// cmd-s to save
+	window.addEventListener('keydown', function(e) {
+		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
+			&& e.keyCode === 83
+		) {
+			e.preventDefault()
+
+			if (editor === globals.editorInFocus) {
+//				log(`editor ${filename}: saving, TODO`)
+//				fs.writeFileSync(filename, editor.textContent, 'utf8')
+//				alert(humanReadableFilename + ' saved')
+			}
+		}
+	})
+
+}
+
 initClassicEditor('./editor.js', '.editor.classic')
-initClassicEditor('./index.html', '.editor.new')
+initNewEditor('./main.js', '.editor.new')
