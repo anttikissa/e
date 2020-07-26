@@ -4,7 +4,47 @@ let path = require('path')
 let log = console.log
 
 let globals = {
-	editorInFocus: null
+	// DOM element of editor that is in focus
+	editorInFocus: null,
+
+	cursor: {
+		x: 0,
+		y: 0,
+	}
+}
+
+// Temporary solution to get changes rendered
+function render() {
+// TODO
+}
+
+// event keyCodes, some of the more popular ones
+let keyCodes = {
+	9: 'tab',
+	40: 'down',
+	38: 'up',
+	37: 'left',
+	39: 'right'
+}
+
+let actions = {
+	cursorDown: () => {
+log('cur down')
+		globals.cursor.y++
+		render()
+	},
+	cursorUp: () => {
+		globals.cursor.y--
+		render()
+	},
+	cursorLeft: () => {
+		globals.cursor.x--
+		render()
+	},
+	cursorRight: () => {
+		globals.cursor.x++
+		render()
+	},
 }
 
 function initClassicEditor(filename, selector) {
@@ -84,6 +124,7 @@ function initNewEditor(filename, selector) {
 	let editor = document.querySelector(selector)
 
 	function render() {
+let start = Date.now()
 		editor.innerHTML = ''
 		for (let line of content) {
 			let lineElement = document.createElement('div')
@@ -106,11 +147,26 @@ function initNewEditor(filename, selector) {
 			editor.appendChild(lineElement)
 		}
 
-		// TODO
 		let cursor = document.createElement('div')
+		cursor.className = 'cursor'
+
+		let cursorX = globals.cursor.x + 'ch'
+		// TODO dependency on line height, which is 16 px right now
+		let cursorY = globals.cursor.y * 16 + 'px'
+		cursor.style.setProperty('--x', cursorX)
+		cursor.style.setProperty('--y', cursorY)
+
+		editor.appendChild(cursor)
+
+let end = Date.now()
+
+		log('render', end - start, 'ms')
 	}
 
 	render()
+
+// Dirtyyy
+setInterval(render, 1000 / 30)
 
 	editor.focus()
 
@@ -126,14 +182,47 @@ function initNewEditor(filename, selector) {
 
 	// tab inserts a tab instead of the usual
 	editor.addEventListener('keydown', function(e) {
-		if (e.keyCode === 9) {
+		let key = keyCodes[e.keyCode]
+
+		if (!key) {
+			log(`Unknown keyCode ${e.keyCode}`)
+		}
+
+		if (key === 'tab') {
 			e.preventDefault()
 			// TODO implement tab
 		}
+
+		if (key === 'down') {
+			e.preventDefault()
+			actions.cursorDown()
+		}
+
+		if (key === 'up') {
+			e.preventDefault()
+			actions.cursorUp()
+		}
+
+		if (key === 'left') {
+			e.preventDefault()
+			actions.cursorLeft()
+		}
+
+		if (key === 'right') {
+			e.preventDefault()
+			actions.cursorRight()
+		}
+
 	})
 
 	// cmd-s to save
 	window.addEventListener('keydown', function(e) {
+		let key = keyCodes[e.keyCode]
+
+		if (!key) {
+			log(`Unknown keyCode ${e.keyCode}`)
+		}
+		
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
 			&& e.keyCode === 83
 		) {
@@ -145,8 +234,9 @@ function initNewEditor(filename, selector) {
 //				alert(humanReadableFilename + ' saved')
 			}
 		}
-	})
 
+//		log('!!! down', e.keyCode)
+	})
 }
 
 initClassicEditor('./editor.js', '.editor.classic')

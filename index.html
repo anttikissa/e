@@ -25,6 +25,9 @@
 			font-family: 'Operator Mono', 'Courier New', monospace;
 			font-size: 13px;
 			line-height: 16px;
+
+			overflow: scroll;
+			position: relative;
 		}
 
 		.editor:not(:focus) {
@@ -51,6 +54,18 @@
 
 		.editor > .line > .char {
 			display: inline-block;
+		}
+
+		.editor > .cursor {
+			position: absolute;
+			top: 0;
+			left: 0;
+
+			width: 2px;
+			height: 16px;
+			background: #fff;
+
+			transform: translate(var(--x), var(--y));
 		}
 	</style>
 	<body>
