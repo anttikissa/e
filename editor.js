@@ -88,11 +88,26 @@ function initNewEditor(filename, selector) {
 		for (let line of content) {
 			let lineElement = document.createElement('div')
 			lineElement.className = 'line'
-			lineElement.textContent = line
+
+			for (let char of line) {
+				let charElement = document.createElement('div')
+
+				charElement.className = 'char'
+
+				if (char === '\t') {
+					char = '    '
+					charElement.classList.add('tab')
+				}
+
+				charElement.textContent = char
+				lineElement.appendChild(charElement)
+			}
+
 			editor.appendChild(lineElement)
 		}
 
-//		editor.textContent = file
+		// TODO
+		let cursor = document.createElement('div')
 	}
 
 	render()
