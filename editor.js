@@ -1,45 +1,60 @@
 let fs = require('fs')
 let path = require('path')
 
-let filename = './editor.js'
-let file = fs.readFileSync(filename, 'utf8')
+let log = console.log
 
-let humanReadableFilename = path.normalize(filename)
+let globals = {
+	editorInFocus: null
+}
 
-document.title = humanReadableFilename
+function initClassicEditor(filename, selector) {
+	let file = fs.readFileSync(filename, 'utf8')
+	let humanReadableFilename = path.normalize(filename)
 
-let editor = document.querySelector('.editor.classic')
-editor.value = file
+	let editor = document.querySelector(selector)
 
-// cannot be seen
-// console.log('file', file)
+	editor.value = file
 
-// does not work
-// win.showDevTools()
+	editor.focus()
 
-// tab inserts a tab instead of the usual
-editor.addEventListener('keydown', function(e) {
-	if (e.keyCode === 9) {
-		e.preventDefault()
-		let pos = this.selectionStart
-		let before = this.value.substring(0, this.selectionStart)
-		let after = this.value.substring(this.selectionStart)
-		this.value = before + '\t' + after
-		this.selectionStart = pos + 1
-		this.selectionEnd = pos + 1
+	let gotFocus = () => {
+		log(`editor ${filename}: got focus`)
+		document.title = humanReadableFilename
+		globals.editorInFocus = editor
 	}
-})
 
-// cmd-s to save
-window.addEventListener('keydown', function(e) {
-	if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
-		&& e.keyCode === 83
-	) {
-		e.preventDefault()
+	editor.addEventListener('focus', gotFocus)
+	editor.focus()
+	gotFocus()
 
-		fs.writeFileSync(filename, editor.value, 'utf8')
-		alert(humanReadableFilename + ' saved')
-	}
-})
+	// tab inserts a tab instead of the usual
+	editor.addEventListener('keydown', function(e) {
+		if (e.keyCode === 9) {
+			e.preventDefault()
+			let pos = this.selectionStart
+			let before = this.value.substring(0, this.selectionStart)
+			let after = this.value.substring(this.selectionStart)
+			this.value = before + '\t' + after
+			this.selectionStart = pos + 1
+			this.selectionEnd = pos + 1
+		}
+	})
 
-editor.focus()
+	// cmd-s to save
+	window.addEventListener('keydown', function(e) {
+		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
+			&& e.keyCode === 83
+		) {
+			e.preventDefault()
+
+			if (editor === globals.editorInFocus) {
+				log(`editor ${filename}: saving`)
+				fs.writeFileSync(filename, editor.value, 'utf8')
+				alert(humanReadableFilename + ' saved')
+			}
+		}
+	})
+}
+
+initClassicEditor('./editor.js', '.editor.classic')
+initClassicEditor('./index.html', '.editor.new')
