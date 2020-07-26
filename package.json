@@ -1,4 +1,7 @@
 {
 	"name": "e",
-	"main": "index.html"
+	"main": "main.js",
+	"devDependencies": {
+		"electron": "^9.1.1"
+	}
 }

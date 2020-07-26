@@ -1,4 +1,6 @@
 #!/bin/bash
 
-~/Downloads/nw-sdk/nwjs.app/Contents/MacOS/nwjs .
+cd $(dirname "$0")
+export PATH=$PATH:./node_modules
 
+electron .
