@@ -17,10 +17,18 @@
 			white-space: pre;
 			width: calc(50% - 2px);
 			height: calc(100% - 2px);
-			border: 1px solid #a9ff0066;
+			border: 1px solid #a9ff00d1;
 			background: black;
 			color: white;
 			margin: 1px;
+
+			font-family: 'Operator Mono', 'Courier New', monospace;
+			font-size: 13px;
+			line-height: 16px;
+		}
+
+		.editor:not(:focus) {
+			opacity: 0.7;
 		}
 
 		.editor.left {
@@ -34,8 +42,11 @@
 		}
 
 		.editor:focus {
-			border: 1px solid #a9ff00d1;
 			outline: none;
+		}
+
+		.editor > .line {
+			height: 16px;
 		}
 	</style>
 	<body>

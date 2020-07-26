@@ -18,7 +18,7 @@ function initClassicEditor(filename, selector) {
 	editor.focus()
 
 	let gotFocus = () => {
-		log(`editor ${filename}: got focus`)
+		log(`editor classic ${filename}: got focus`)
 		document.title = humanReadableFilename
 		globals.editorInFocus = editor
 	}
@@ -48,7 +48,7 @@ function initClassicEditor(filename, selector) {
 			e.preventDefault()
 
 			if (editor === globals.editorInFocus) {
-				log(`editor ${filename}: saving`)
+				log(`editor classic ${filename}: saving`)
 				fs.writeFileSync(filename, editor.value, 'utf8')
 				alert(humanReadableFilename + ' saved')
 			}
@@ -56,12 +56,46 @@ function initClassicEditor(filename, selector) {
 	})
 }
 
+// File content is an array of lines
+//
+// TODO:
+// - empty file results in ['']
+// - when saving, we should make sure that all lines are terminated
+let fileUtils = {
+	load(filename) {
+		let file = fs.readFileSync(filename, 'utf8')
+		let content = file.split('\n')
+		return content
+	},
+
+	save(filename, content) {
+		let file = content.join('\n')
+		fs.writeFileSync(filename, file, 'utf8')
+	}
+}
+
 function initNewEditor(filename, selector) {
 	let file = fs.readFileSync(filename, 'utf8')
+
+	let content = fileUtils.load(filename)
+
 	let humanReadableFilename = path.normalize(filename)
 
 	let editor = document.querySelector(selector)
-	editor.textContent = file
+
+	function render() {
+		editor.innerHTML = ''
+		for (let line of content) {
+			let lineElement = document.createElement('div')
+			lineElement.className = 'line'
+			lineElement.textContent = line
+			editor.appendChild(lineElement)
+		}
+
+//		editor.textContent = file
+	}
+
+	render()
 
 	editor.focus()
 
@@ -91,7 +125,7 @@ function initNewEditor(filename, selector) {
 			e.preventDefault()
 
 			if (editor === globals.editorInFocus) {
-//				log(`editor ${filename}: saving, TODO`)
+				log(`editor ${filename}: saving, TODO`)
 //				fs.writeFileSync(filename, editor.textContent, 'utf8')
 //				alert(humanReadableFilename + ' saved')
 			}
@@ -101,4 +135,4 @@ function initNewEditor(filename, selector) {
 }
 
 initClassicEditor('./editor.js', '.editor.classic')
-initNewEditor('./main.js', '.editor.new')
+initNewEditor('./editor.js', '.editor.new')
