@@ -3,6 +3,37 @@ let path = require('path')
 
 let log = console.log
 
+class Stream {
+	constructor(initial = undefined) {
+		this.listeners = []
+		this._value = initial
+		this.hasValue = initial !== undefined
+	}
+
+	forEach(listener) {
+		this.listeners.push(listener)
+		if (this.hasValue) {
+			listener(this._value)
+		}
+	}
+
+	get value() {
+		return this._value
+	}
+
+	set value(newValue) {
+		this._value = newValue
+		this.hasValue = true
+		for (let listener of this.listeners) {
+			listener(this._value)
+		}
+	}
+}
+
+function stream(initial = undefined) {
+	return new Stream(initial)
+}
+
 let globals = {
 	// DOM element of editor that is in focus
 	editorInFocus: null,
@@ -159,14 +190,13 @@ let start = Date.now()
 		editor.appendChild(cursor)
 
 let end = Date.now()
-
-		log('render', end - start, 'ms')
+//log('render', end - start, 'ms')
 	}
 
 	render()
 
 // Dirtyyy
-setInterval(render, 1000 / 30)
+setInterval(render, 1000)
 
 	editor.focus()
 
@@ -222,7 +252,7 @@ setInterval(render, 1000 / 30)
 		if (!key) {
 			log(`Unknown keyCode ${e.keyCode}`)
 		}
-		
+
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
 			&& e.keyCode === 83
 		) {
