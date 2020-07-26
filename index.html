@@ -5,23 +5,48 @@
 	</head>
 	<style>
 		html, body {
+			margin: 0;
 			height: 100%;
+
+			background: black;
 		}
 
 		.editor {
+			box-sizing: border-box;
 			white-space: pre;
-			width: 100%;
-			height: 100%;
+			width: calc(50% - 2px);
+			height: calc(100% - 2px);
+			border: 1px solid #a9ff0066;
+			background: black;
+			color: white;
+			margin: 1px;
+		}
+
+		.editor.left {
+			float: left;
+		}
+
+		.editor.right {
+			float: right;
+			width: calc(50% - 1px);
+			margin-left: 0;
+		}
+
+		.editor:focus {
+			border: 1px solid #a9ff00d1;
+			outline: none;
 		}
 	</style>
 	<body>
-		<textarea class="editor">
+		<textarea class="editor left classic">
 		</textarea>
+		<div class="editor right new" tabIndex=1></div>
+
 		<script>
 			let fs = require('fs')
 			let file = fs.readFileSync('./index.html', 'utf8')
 
-			let editor = document.querySelector('.editor')
+			let editor = document.querySelector('.editor.classic')
 			editor.value = file
 
 			// cannot be seen
@@ -54,6 +79,8 @@
 					alert('index.html saved')
   				}
 			})
+
+			editor.focus()
 		</script>
 	</body>
 </html>
