@@ -3,6 +3,10 @@ let path = require('path')
 
 let log = console.log
 
+function error(...args) {
+	log('Error:', ...args)
+}
+
 class Stream {
 	constructor(initial = undefined) {
 		this.listeners = []
@@ -68,19 +72,20 @@ let globals = {
 	// DOM element of editor that is in focus
 	editorInFocus: null,
 
+	// Events stream of changes to file. [startLine, endLine] indicates
+	// range of lines that should be rerendered. (A bit prematurely
+	// optimized here?)
+	fileChangeEvents: stream([0, Infinity]),
+
 	cursor: {
 		x: stream(0),
 		y: stream(0),
 	}
 }
 
-// Temporary solution to get changes rendered
-function render() {
-// TODO
-}
-
 // event keyCodes, some of the more popular ones
 let keyCodes = {
+	8: 'backspace',
 	9: 'tab',
 	40: 'down',
 	38: 'up',
@@ -90,22 +95,39 @@ let keyCodes = {
 
 let actions = {
 	cursorDown: () => {
-log('cur down')
 		globals.cursor.y.value++
-		render()
 	},
 	cursorUp: () => {
 		globals.cursor.y.value--
-		render()
 	},
 	cursorLeft: () => {
 		globals.cursor.x.value--
-		render()
 	},
 	cursorRight: () => {
 		globals.cursor.x.value++
-		render()
 	},
+	backspace: (content) => {
+		// TODO
+	}
+}
+
+// Modify content by inserting a character 'character' at the current cursor position
+// Should be an action?
+function insert(content, character) {
+	let lineNumber = globals.cursor.y.value
+	let columnNumber = globals.cursor.x.value
+	
+	let line = content[lineNumber]
+	if (!line) {
+		error('No line at cursor position')
+	}
+
+	let start = line.substring(0, columnNumber)
+	let end = line.substring(columnNumber)
+	content[lineNumber] = start + character + end
+	globals.cursor.x.value += character.length
+
+	globals.fileChangeEvents.value = [lineNumber, lineNumber]
 }
 
 function initClassicEditor(filename, selector) {
@@ -227,6 +249,11 @@ function initNewEditor(filename, selector) {
 
 	render()
 
+	globals.fileChangeEvents.forEach(([startLine, endLine]) => {
+		// TODO use startLine and endLine
+		render()
+	})
+
 	stream.combine(globals.cursor.x, globals.cursor.y).forEach(([x, y]) => {
 		renderCursor(x, y)
 	})
@@ -253,7 +280,7 @@ function initNewEditor(filename, selector) {
 
 		if (key === 'tab') {
 			e.preventDefault()
-			// TODO implement tab
+			insert(content, '\t')
 		}
 
 		if (key === 'down') {
@@ -277,6 +304,14 @@ function initNewEditor(filename, selector) {
 		}
 	})
 
+	editor.addEventListener('keypress', function(e) {
+		log('Got key', e)
+		if (e.key) {
+			insert(content, e.key)
+		}
+
+	})
+
 	// cmd-s to save
 	window.addEventListener('keydown', function(e) {
 		let key = keyCodes[e.keyCode]
@@ -288,7 +323,7 @@ function initNewEditor(filename, selector) {
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
 			&& e.keyCode === 83
 		) {
-			e.preventDefault()
+			e.preventDefault()  
 
 			if (editor === globals.editorInFocus) {
 				log(`editor ${filename}: saving, TODO`)
