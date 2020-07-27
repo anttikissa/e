@@ -186,7 +186,8 @@ function initNewEditor(filename, selector) {
 	let textElement = editor.querySelector('.text')
 
 	function render() {
-let start = Date.now()
+		let start = Date.now()
+
 		textElement.innerHTML = ''
 		for (let line of content) {
 			let lineElement = document.createElement('div')
@@ -209,22 +210,25 @@ let start = Date.now()
 			textElement.appendChild(lineElement)
 		}
 
-		let cursor = editor.querySelector('.cursor')
+		renderCursor(globals.cursor.x.value, globals.cursor.y.value)
 
-		let cursorX = globals.cursor.x + 'ch'
+		let end = Date.now()
+		log('render', end - start, 'ms')
+	}
+
+	function renderCursor(x, y) {
+		let cursor = editor.querySelector('.cursor')
+		let cursorX = x + 'ch'
 		// TODO dependency on line height, which is 16 px right now
-		let cursorY = globals.cursor.y * 16 + 'px'
+		let cursorY = y * 16 + 'px'
 		cursor.style.setProperty('--x', cursorX)
 		cursor.style.setProperty('--y', cursorY)
-
-let end = Date.now()
-log('render', end - start, 'ms')
 	}
 
 	render()
 
 	stream.combine(globals.cursor.x, globals.cursor.y).forEach(([x, y]) => {
-		render()
+		renderCursor(x, y)
 	})
 
 	editor.focus()
