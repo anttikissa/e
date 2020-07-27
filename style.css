@@ -41,12 +41,17 @@ html, body {
 	outline: none;
 }
 
-.editor > .line {
+.editor > .text > .line {
 	height: 16px;
 }
 
-.editor > .line > .char {
+.editor > .text > .line > .char {
 	display: inline-block;
+}
+
+.editor > .text {
+	position: absolute;
+	top: 0;
 }
 
 .editor > .cursor {

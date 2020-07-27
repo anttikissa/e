@@ -50,7 +50,7 @@ stream.combine = function(...streams) {
 	result.pull = function() {
 		if (streams.every(s => s.hasValue)) {
 			this.value = streams.map(s => s.value)
-		}		
+		}
 	}
 
 	for (let s of streams) {
@@ -183,10 +183,11 @@ function initNewEditor(filename, selector) {
 	let humanReadableFilename = path.normalize(filename)
 
 	let editor = document.querySelector(selector)
+	let textElement = editor.querySelector('.text')
 
 	function render() {
 let start = Date.now()
-		editor.innerHTML = ''
+		textElement.innerHTML = ''
 		for (let line of content) {
 			let lineElement = document.createElement('div')
 			lineElement.className = 'line'
@@ -205,11 +206,10 @@ let start = Date.now()
 				lineElement.appendChild(charElement)
 			}
 
-			editor.appendChild(lineElement)
+			textElement.appendChild(lineElement)
 		}
 
-		let cursor = document.createElement('div')
-		cursor.className = 'cursor'
+		let cursor = editor.querySelector('.cursor')
 
 		let cursorX = globals.cursor.x + 'ch'
 		// TODO dependency on line height, which is 16 px right now
@@ -217,16 +217,15 @@ let start = Date.now()
 		cursor.style.setProperty('--x', cursorX)
 		cursor.style.setProperty('--y', cursorY)
 
-		editor.appendChild(cursor)
-
 let end = Date.now()
-//log('render', end - start, 'ms')
+log('render', end - start, 'ms')
 	}
 
 	render()
 
-// Dirtyyy
-setInterval(render, 1000)
+	stream.combine(globals.cursor.x, globals.cursor.y).forEach(([x, y]) => {
+		render()
+	})
 
 	editor.focus()
 
@@ -272,7 +271,6 @@ setInterval(render, 1000)
 			e.preventDefault()
 			actions.cursorRight()
 		}
-
 	})
 
 	// cmd-s to save
