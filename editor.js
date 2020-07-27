@@ -11,10 +11,14 @@ class Stream {
 	}
 
 	forEach(listener) {
-		this.listeners.push(listener)
+		this.addListener(listener)
 		if (this.hasValue) {
 			listener(this._value)
 		}
+	}
+
+	addListener(listener) {
+		this.listeners.push(listener)
 	}
 
 	get value() {
@@ -28,10 +32,36 @@ class Stream {
 			listener(this._value)
 		}
 	}
+
+	// Allows the stream to be used as value in contexts like
+	// 'value is ' + stream(123)
+	// => 'value is 123'
+	valueOf() {
+		return this._value
+	}
 }
 
 function stream(initial = undefined) {
 	return new Stream(initial)
+}
+
+stream.combine = function(...streams) {
+	let result = stream()
+	result.pull = function() {
+		if (streams.every(s => s.hasValue)) {
+			this.value = streams.map(s => s.value)
+		}		
+	}
+
+	for (let s of streams) {
+		s.addListener(function() {
+			result.pull()
+		})
+	}
+
+	result.pull()
+
+	return result
 }
 
 let globals = {
@@ -39,8 +69,8 @@ let globals = {
 	editorInFocus: null,
 
 	cursor: {
-		x: 0,
-		y: 0,
+		x: stream(0),
+		y: stream(0),
 	}
 }
 
@@ -61,19 +91,19 @@ let keyCodes = {
 let actions = {
 	cursorDown: () => {
 log('cur down')
-		globals.cursor.y++
+		globals.cursor.y.value++
 		render()
 	},
 	cursorUp: () => {
-		globals.cursor.y--
+		globals.cursor.y.value--
 		render()
 	},
 	cursorLeft: () => {
-		globals.cursor.x--
+		globals.cursor.x.value--
 		render()
 	},
 	cursorRight: () => {
-		globals.cursor.x++
+		globals.cursor.x.value++
 		render()
 	},
 }
