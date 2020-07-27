@@ -1,73 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<meta charset='utf-8'>
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'">
 	<head>
 		<title>E</title>
 	</head>
-	<style>
-		html, body {
-			margin: 0;
-			height: 100%;
-
-			background: black;
-		}
-
-		.editor {
-			box-sizing: border-box;
-			white-space: pre;
-			width: calc(50% - 2px);
-			height: calc(100% - 2px);
-			border: 1px solid #a9ff00d1;
-			background: black;
-			color: white;
-			margin: 1px;
-
-			font-family: 'Operator Mono', 'Courier New', monospace;
-			font-size: 13px;
-			line-height: 16px;
-
-			overflow: scroll;
-			position: relative;
-		}
-
-		.editor:not(:focus) {
-			opacity: 0.7;
-		}
-
-		.editor.left {
-			float: left;
-		}
-
-		.editor.right {
-			float: right;
-			width: calc(50% - 1px);
-			margin-left: 0;
-		}
-
-		.editor:focus {
-			outline: none;
-		}
-
-		.editor > .line {
-			height: 16px;
-		}
-
-		.editor > .line > .char {
-			display: inline-block;
-		}
-
-		.editor > .cursor {
-			position: absolute;
-			top: 0;
-			left: 0;
-
-			width: 2px;
-			height: 16px;
-			background: #fff;
-
-			transform: translate(var(--x), var(--y));
-		}
-	</style>
+	<link rel=stylesheet href="style.css">
 	<body>
 		<textarea class="editor left classic">
 		</textarea>
