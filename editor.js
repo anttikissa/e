@@ -83,16 +83,6 @@ let globals = {
 	}
 }
 
-// event keyCodes, some of the more popular ones
-let keyCodes = {
-	8: 'backspace',
-	9: 'tab',
-	40: 'down',
-	38: 'up',
-	37: 'left',
-	39: 'right'
-}
-
 let actions = {
 	cursorDown: () => {
 		globals.cursor.y.value++
@@ -164,7 +154,7 @@ function initClassicEditor(filename, selector) {
 	})
 
 	// cmd-s to save
-	window.addEventListener('keydown', function(e) {
+	editor.addEventListener('keydown', function(e) {
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
 			&& e.keyCode === 83
 		) {
@@ -193,7 +183,7 @@ let fileUtils = {
 
 	save(filename, content) {
 		let file = content.join('\n')
-		fs.writeFileSync(filename, file, 'utf8')
+		fs.writeFileSync(filename + '-test', file, 'utf8')
 	}
 }
 
@@ -272,33 +262,29 @@ function initNewEditor(filename, selector) {
 
 	// tab inserts a tab instead of the usual
 	editor.addEventListener('keydown', function(e) {
-		let key = keyCodes[e.keyCode]
+		let key = e.key
 
-		if (!key) {
-			log(`Unknown keyCode ${e.keyCode}`)
-		}
-
-		if (key === 'tab') {
+		if (key === 'Tab') {
 			e.preventDefault()
 			insert(content, '\t')
 		}
 
-		if (key === 'down') {
+		if (key === 'ArrowDown') {
 			e.preventDefault()
 			actions.cursorDown()
 		}
 
-		if (key === 'up') {
+		if (key === 'ArrowUp') {
 			e.preventDefault()
 			actions.cursorUp()
 		}
 
-		if (key === 'left') {
+		if (key === 'ArrowLeft') {
 			e.preventDefault()
 			actions.cursorLeft()
 		}
 
-		if (key === 'right') {
+		if (key === 'ArrowRight') {
 			e.preventDefault()
 			actions.cursorRight()
 		}
@@ -313,26 +299,22 @@ function initNewEditor(filename, selector) {
 	})
 
 	// cmd-s to save
-	window.addEventListener('keydown', function(e) {
-		let key = keyCodes[e.keyCode]
+	editor.addEventListener('keydown', function(e) {
+log('keydown', e.key)
 
-		if (!key) {
-			log(`Unknown keyCode ${e.keyCode}`)
-		}
+		let key = e.key
 
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
 			&& e.keyCode === 83
 		) {
-			e.preventDefault()  
+			e.preventDefault()
 
 			if (editor === globals.editorInFocus) {
-				log(`editor ${filename}: saving, TODO`)
-//				fs.writeFileSync(filename, editor.textContent, 'utf8')
-//				alert(humanReadableFilename + ' saved')
+				log(`editor ${filename}: saving`)
+				fileUtils.save(filename, content)
+				alert(humanReadableFilename + ' saved')
 			}
 		}
-
-//		log('!!! down', e.keyCode)
 	})
 }
 
