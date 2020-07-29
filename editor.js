@@ -1,4 +1,4 @@
-let fs = require('fs')
+let fs = require('fs') // hihii
 let path = require('path')
 
 let log = console.log
@@ -87,38 +87,56 @@ let actions = {
 	cursorDown: () => {
 		globals.cursor.y.value++
 	},
+
 	cursorUp: () => {
 		globals.cursor.y.value--
 	},
+
 	cursorLeft: () => {
 		globals.cursor.x.value--
 	},
+
 	cursorRight: () => {
 		globals.cursor.x.value++
 	},
+
 	backspace: (content) => {
-		// TODO
+		let lineNumber = globals.cursor.y.value
+		let columnNumber = globals.cursor.x.value
+
+		let line = content[lineNumber]
+		if (!line) {
+			error('No line at cursor position')
+		}
+
+		let start = line.substring(0, columnNumber - 1)
+		let end = line.substring(columnNumber)
+
+		content[lineNumber] = start + end
+		globals.cursor.x.value--
+
+		globals.fileChangeEvents.value = [lineNumber, lineNumber]
+	},
+
+	insert: (content, character) => {
+		let lineNumber = globals.cursor.y.value
+		let columnNumber = globals.cursor.x.value
+
+		let line = content[lineNumber]
+		if (!line) {
+			error('No line at cursor position')
+		}
+
+		let start = line.substring(0, columnNumber)
+		let end = line.substring(columnNumber)
+		content[lineNumber] = start + character + end
+		globals.cursor.x.value += character.length
+
+		globals.fileChangeEvents.value = [lineNumber, lineNumber]
 	}
+
 }
 
-// Modify content by inserting a character 'character' at the current cursor position
-// Should be an action?
-function insert(content, character) {
-	let lineNumber = globals.cursor.y.value
-	let columnNumber = globals.cursor.x.value
-	
-	let line = content[lineNumber]
-	if (!line) {
-		error('No line at cursor position')
-	}
-
-	let start = line.substring(0, columnNumber)
-	let end = line.substring(columnNumber)
-	content[lineNumber] = start + character + end
-	globals.cursor.x.value += character.length
-
-	globals.fileChangeEvents.value = [lineNumber, lineNumber]
-}
 
 function initClassicEditor(filename, selector) {
 	let file = fs.readFileSync(filename, 'utf8')
@@ -183,7 +201,7 @@ let fileUtils = {
 
 	save(filename, content) {
 		let file = content.join('\n')
-		fs.writeFileSync(filename + '-test', file, 'utf8')
+		fs.writeFileSync(filename, file, 'utf8')
 	}
 }
 
@@ -288,12 +306,18 @@ function initNewEditor(filename, selector) {
 			e.preventDefault()
 			actions.cursorRight()
 		}
+
+		if (key === 'Backspace') {
+			e.preventDefault()
+			actions.backspace(content)
+		}
+
 	})
 
 	editor.addEventListener('keypress', function(e) {
-		log('Got key', e)
+		log('keypress', e)
 		if (e.key) {
-			insert(content, e.key)
+			actions.insert(content, e.key)
 		}
 
 	})
