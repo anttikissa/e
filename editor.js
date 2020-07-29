@@ -1,4 +1,4 @@
-let fs = require('fs') // hihii
+let fs = require('fs')
 let path = require('path')
 
 let log = console.log
@@ -133,6 +133,25 @@ let actions = {
 		globals.cursor.x.value += character.length
 
 		globals.fileChangeEvents.value = [lineNumber, lineNumber]
+	},
+
+	enter: (content) => {
+		let lineNumber = globals.cursor.y.value
+		let columnNumber = globals.cursor.x.value
+		let line = content[lineNumber]
+
+		if (!line) {
+			error('No line at cursor position')
+		}
+
+		let start = line.substring(0, columnNumber)
+		let end = line.substring(columnNumber)
+		content[lineNumber] = start
+		content.splice(lineNumber + 1, 0, end)
+
+		globals.fileChangeEvents.value = [lineNumber, Infinity]
+		globals.cursor.x.value = 0
+		globals.cursor.y.value = lineNumber + 1
 	}
 
 }
@@ -281,6 +300,7 @@ function initNewEditor(filename, selector) {
 	// tab inserts a tab instead of the usual
 	editor.addEventListener('keydown', function(e) {
 		let key = e.key
+log('keydown', key)
 
 		if (key === 'Tab') {
 			e.preventDefault()
@@ -312,6 +332,15 @@ function initNewEditor(filename, selector) {
 			actions.backspace(content)
 		}
 
+		if (key === ' ') {
+			e.preventDefault()
+			actions.insert(content, ' ')
+		}
+
+		if (key === 'Enter') {
+			e.preventDefault()
+			actions.enter(content)
+		}
 	})
 
 	editor.addEventListener('keypress', function(e) {
@@ -324,8 +353,6 @@ function initNewEditor(filename, selector) {
 
 	// cmd-s to save
 	editor.addEventListener('keydown', function(e) {
-log('keydown', e.key)
-
 		let key = e.key
 
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
