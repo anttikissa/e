@@ -288,8 +288,27 @@ function initNewEditor(filename, selector) {
 	open(filename)
 
 	function renderCursor(x, y) {
+		let lineAtY = content[y]
+
+		if (!lineAtY) {
+			error('No line at y')
+		}
+
+		// Do tabs
+		let visibleX = 0
+		for (let i = 0; i < x; i++) {
+			let c = lineAtY[i]
+			if (c === '\t') {
+				do {
+					visibleX++
+				} while (visibleX % 4 !== 0)
+			} else {
+				visibleX++
+			}
+		}
+
 		let cursor = editor.querySelector('.cursor')
-		let cursorX = x + 'ch'
+		let cursorX = visibleX + 'ch'
 		// TODO dependency on line height, which is 16 px right now
 		let cursorY = y * 16 + 'px'
 		cursor.style.setProperty('--x', cursorX)
