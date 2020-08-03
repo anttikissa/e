@@ -68,6 +68,11 @@ stream.combine = function(...streams) {
 	return result
 }
 
+let config = {
+	fontHeight: 16,
+	fontWidth: 0, // will be computed when the first character is rendered
+}
+
 let globals = {
 	// DOM element of editor that is in focus
 	editorInFocus: null,
@@ -258,6 +263,8 @@ function initNewEditor(filename, selector) {
 		let start = Date.now()
 
 		textElement.innerHTML = ''
+		let firstCharElement
+
 		for (let line of content) {
 			let lineElement = document.createElement('div')
 			lineElement.className = 'line'
@@ -278,6 +285,7 @@ function initNewEditor(filename, selector) {
 					visibleX += missingChars
 				} else {
 					visibleX++
+					firstCharElement = firstCharElement || charElement
 				}
 
 				charElement.textContent = char
@@ -285,6 +293,9 @@ function initNewEditor(filename, selector) {
 			}
 
 			textElement.appendChild(lineElement)
+			if (!config.fontWidth) {
+				config.fontWidth = firstCharElement.clientWidth
+			}
 		}
 
 		renderCursor(globals.cursor.x.value, globals.cursor.y.value)
@@ -298,8 +309,9 @@ function initNewEditor(filename, selector) {
 	function renderCursor(x, y) {
 		let lineAtY = content[y]
 
-		if (!lineAtY) {
-			error('No line at y')
+		if (lineAtY === undefined) {
+			error('No line at ' + y)
+			return
 		}
 
 		// Do tabs
@@ -457,7 +469,28 @@ log('text-wrapper keydown', key)
 		if (e.key) {
 			actions.insert(content, e.key)
 		}
+	})
 
+	textWrapper.addEventListener('click', function(e) {
+		let rect = textElement.getBoundingClientRect()
+		var x = e.clientX - rect.left
+		var y = e.clientY - rect.top
+
+		let MAGIC_Y = 0.5
+
+		let line = Math.round(y / config.fontHeight - MAGIC_Y)
+		let column = Math.round(x / config.fontWidth)
+
+		globals.cursor.x.value = column
+		globals.cursor.y.value = line
+	})
+
+	function getActualCursorPos(screenX, line) {
+		// TODO
+	}
+
+	textWrapper.addEventListener('dblclick', function(e) {
+		log('!!! dblclick', e)
 	})
 }
 
