@@ -375,6 +375,13 @@ log('text-wrapper keydown', key)
 			let prompt = editor.querySelector('.prompt')
 			prompt.innerHTML = ''
 
+			prompt.classList.remove('hidden')
+
+			function closePrompt() {
+				prompt.classList.add('hidden')
+				textWrapper.focus()
+			}
+
 			let label = document.createElement('label')
 			label.textContent = 'Open file:'
 			
@@ -383,8 +390,17 @@ log('text-wrapper keydown', key)
 				log('keydown jee', ev)
 				if (ev.key === 'Enter') {
 					if (input.value) {
-						open(input.value)
+						try {
+							open(input.value)
+							closePrompt()
+						} catch (err) {
+							alert(err.message)
+						}
 					}
+				}
+
+				if (ev.key === 'Escape') {
+					closePrompt()
 				}
 			})
 

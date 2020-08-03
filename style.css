@@ -5,6 +5,10 @@ html, body {
 	background: black;
 }
 
+.hidden {
+	display: none;
+}
+
 .editor {
 	box-sizing: border-box;
 	width: calc(50% - 2px);
