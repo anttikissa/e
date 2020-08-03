@@ -411,8 +411,9 @@ log('text-wrapper keydown', key)
 
 			let label = document.createElement('label')
 			label.textContent = 'Open file:'
-			
+
 			let input = document.createElement('input')
+			input.setAttribute('spellcheck', 'false')
 			input.addEventListener('keydown', (ev) => {
 				log('keydown jee', ev)
 				if (ev.key === 'Enter') {
@@ -427,6 +428,18 @@ log('text-wrapper keydown', key)
 					}
 				}
 
+				if (ev.key === 'Tab') {
+					ev.preventDefault()
+					if (input.value) {
+						let completions = fs.readdirSync('.').filter(x => x.startsWith(input.value))
+						if (completions.length) {
+							input.value = completions[0]
+						} else {
+							log('no completions, might blink or something')
+						}
+					}
+				}
+
 				if (ev.key === 'Escape') {
 					closePrompt()
 				}
@@ -437,7 +450,6 @@ log('text-wrapper keydown', key)
 
 			input.focus()
 		}
-
 	})
 
 	textWrapper.addEventListener('keypress', function(e) {
