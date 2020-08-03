@@ -5,27 +5,49 @@ html, body {
 	background: black;
 }
 
+* {
+box-sizing: border-box;
+}
+
 .hidden {
 	display: none;
 }
 
-.editor {
+.editor.classic {
 	box-sizing: border-box;
 	width: calc(50% - 2px);
 	height: calc(100% - 2px);
 	border: 1px solid #a9ff00d1;
+	margin: 1px;
+
+/*	position: relative;*/
+}
+
+.editor {
 	background: black;
 	color: white;
-	margin: 1px;
+	height: calc(100% - 2px);
 
 	font-family: 'Operator Mono', 'Courier New', monospace;
 	font-size: 13px;
 	line-height: 16px;
 
-	position: relative;
 }
 
-.editor:not(:focus) {
+.editor > .text-wrapper {
+	border: 1px solid #a9ff00d1;
+	background: black;
+	color: white;
+	font-family: 'Operator Mono', 'Courier New', monospace;
+	font-size: 13px;
+	line-height: 16px;
+}
+
+.editor.classic:not(:focus) {
+	opacity: 0.7;
+}
+
+.editor > .text-wrapper:not(:focus) {
 	opacity: 0.7;
 }
 
@@ -38,6 +60,11 @@ html, body {
 	width: calc(50% - 1px);
 	margin-left: 0;
 
+	/* make sure we have those 1px holes...
+	 * there's gotta be a better way */
+	margin-top: 1px;
+	margin-right: 1px;
+
 	display: flex;
 	flex-flow: column;
 }
@@ -47,20 +74,38 @@ html, body {
 }
 
 .editor > .prompt {
-	border: 1px solid yellow;
+	border: 1px solid #a9ff00d1;
 	height: 20px;
+
+	margin-bottom: 1px;
 
 	white-space: initial;
 }
 
+.editor > .prompt > input {
+	border: none;
+	background: black;
+	color: white;
+	font-family: inherit;
+	font-size: 13px;
+	margin-left: 5px;
+}
+
+.editor > .prompt > input:focus {
+	outline: none;
+}
+
 .editor > .text-wrapper {
-	border: 1px solid red;
 	white-space: pre;
 
 	flex: 1;
 
 	overflow: scroll;
 	position: relative;
+}
+
+.editor > .text-wrapper:focus {
+outline: none;
 }
 
 .editor > .text-wrapper > .text {
