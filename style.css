@@ -7,7 +7,6 @@ html, body {
 
 .editor {
 	box-sizing: border-box;
-	white-space: pre;
 	width: calc(50% - 2px);
 	height: calc(100% - 2px);
 	border: 1px solid #a9ff00d1;
@@ -19,7 +18,6 @@ html, body {
 	font-size: 13px;
 	line-height: 16px;
 
-	overflow: scroll;
 	position: relative;
 }
 
@@ -35,26 +33,47 @@ html, body {
 	float: right;
 	width: calc(50% - 1px);
 	margin-left: 0;
+
+	display: flex;
+	flex-flow: column;
 }
 
 .editor:focus {
 	outline: none;
 }
 
-.editor > .text > .line {
+.editor > .prompt {
+	border: 1px solid yellow;
+	height: 20px;
+
+	white-space: initial;
+}
+
+.editor > .text-wrapper {
+	border: 1px solid red;
+	white-space: pre;
+
+	flex: 1;
+
+	overflow: scroll;
+	position: relative;
+}
+
+.editor > .text-wrapper > .text {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+
+.editor > .text-wrapper > .text > .line {
 	height: 16px;
 }
 
-.editor > .text > .line > .char {
+.editor > .text-wrapper > .text > .line > .char {
 	display: inline-block;
 }
 
-.editor > .text {
-	position: absolute;
-	top: 0;
-}
-
-.editor > .cursor {
+.editor > .text-wrapper > .cursor {
 	position: absolute;
 	top: 0;
 	left: 0;

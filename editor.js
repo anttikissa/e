@@ -225,16 +225,17 @@ let fileUtils = {
 }
 
 function initNewEditor(filename, selector) {
-	let file = fs.readFileSync(filename, 'utf8')
+	let content
 
-	let content = fileUtils.load(filename)
+	function open(newFilename) {
+		filename = newFilename
+		content = fileUtils.load(filename)
+		globals.fileChangeEvents.value = [0, Infinity]
+	}
 
-	let humanReadableFilename = path.normalize(filename)
+	function render(lines) {
+		log('Rendering, line range', lines)
 
-	let editor = document.querySelector(selector)
-	let textElement = editor.querySelector('.text')
-
-	function render() {
 		let start = Date.now()
 
 		textElement.innerHTML = ''
@@ -265,6 +266,13 @@ function initNewEditor(filename, selector) {
 		log('render', end - start, 'ms')
 	}
 
+	let editor = document.querySelector(selector)
+	let textElement = editor.querySelector('.text')
+
+	open(filename)
+
+	let humanReadableFilename = path.normalize(filename)
+
 	function renderCursor(x, y) {
 		let cursor = editor.querySelector('.cursor')
 		let cursorX = x + 'ch'
@@ -274,12 +282,7 @@ function initNewEditor(filename, selector) {
 		cursor.style.setProperty('--y', cursorY)
 	}
 
-	render()
-
-	globals.fileChangeEvents.forEach(([startLine, endLine]) => {
-		// TODO use startLine and endLine
-		render()
-	})
+	globals.fileChangeEvents.forEach(render)
 
 	stream.combine(globals.cursor.x, globals.cursor.y).forEach(([x, y]) => {
 		renderCursor(x, y)
@@ -297,10 +300,12 @@ function initNewEditor(filename, selector) {
 	editor.focus()
 	gotFocus()
 
+	let textWrapper = editor.querySelector('.text-wrapper')
+
 	// tab inserts a tab instead of the usual
-	editor.addEventListener('keydown', function(e) {
+	textWrapper.addEventListener('keydown', function(e) {
 		let key = e.key
-log('keydown', key)
+log('text-wrapper keydown', key)
 
 		if (key === 'Tab') {
 			e.preventDefault()
@@ -341,23 +346,12 @@ log('keydown', key)
 			e.preventDefault()
 			actions.enter(content)
 		}
-	})
 
-	editor.addEventListener('keypress', function(e) {
-		log('keypress', e)
-		if (e.key) {
-			actions.insert(content, e.key)
-		}
-
-	})
-
-	// cmd-s to save
-	editor.addEventListener('keydown', function(e) {
-		let key = e.key
-
+		// cmd-s to save
 		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
-			&& e.keyCode === 83
+			&& key === 's'
 		) {
+			log('cmd s')
 			e.preventDefault()
 
 			if (editor === globals.editorInFocus) {
@@ -366,6 +360,46 @@ log('keydown', key)
 				alert(humanReadableFilename + ' saved')
 			}
 		}
+
+		// cmd-o to open
+		if ((window.navigator.platform.match('Mac') ? e.metaKey : e.ctrlKey)
+			&& key === 'o'
+		) {
+			log('cmd o')
+			e.preventDefault()
+
+			let prompt = editor.querySelector('.prompt')
+			prompt.innerHTML = ''
+
+			let label = document.createElement('label')
+			label.textContent = 'Open file:'
+			
+			let input = document.createElement('input')
+			input.addEventListener('keydown', (ev) => {
+				log('keydown jee', ev)
+				if (ev.key === 'Enter') {
+log('1')
+					if (input.value) {
+log('1')
+						open(input.value)
+					}
+				}
+			})
+
+			prompt.appendChild(label)
+			prompt.appendChild(input)
+
+			input.focus()
+		}
+
+	})
+
+	textWrapper.addEventListener('keypress', function(e) {
+		log('keypress', e)
+		if (e.key) {
+			actions.insert(content, e.key)
+		}
+
 	})
 }
 
