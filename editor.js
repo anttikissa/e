@@ -389,6 +389,7 @@ log('text-wrapper keydown', key)
 			input.addEventListener('keydown', (ev) => {
 				log('keydown jee', ev)
 				if (ev.key === 'Enter') {
+					ev.preventDefault()
 					if (input.value) {
 						try {
 							open(input.value)
