@@ -226,9 +226,28 @@ let fileUtils = {
 
 function initNewEditor(filename, selector) {
 	let content
+	// TODO make filename a stream and humanReadableFilename a derived version of it
+	let humanReadableFilename = path.normalize(filename)
+
+	let editor = document.querySelector(selector)
+	let textElement = editor.querySelector('.text')
+	let textWrapper = editor.querySelector('.text-wrapper')
+
+	let gotFocus = () => {
+		log(`editor ${filename}: got focus`)
+		document.title = humanReadableFilename
+		globals.editorInFocus = editor
+	}
 
 	function open(newFilename) {
 		filename = newFilename
+		humanReadableFilename = path.normalize(filename)
+
+		// Likewise, it would be a good idea to make the document.title
+		// update automatically by using a stream
+		textWrapper.focus()
+		gotFocus()
+
 		content = fileUtils.load(filename)
 		globals.fileChangeEvents.value = [0, Infinity]
 	}
@@ -266,12 +285,7 @@ function initNewEditor(filename, selector) {
 		log('render', end - start, 'ms')
 	}
 
-	let editor = document.querySelector(selector)
-	let textElement = editor.querySelector('.text')
-
 	open(filename)
-
-	let humanReadableFilename = path.normalize(filename)
 
 	function renderCursor(x, y) {
 		let cursor = editor.querySelector('.cursor')
@@ -288,19 +302,9 @@ function initNewEditor(filename, selector) {
 		renderCursor(x, y)
 	})
 
-	editor.focus()
-
-	let gotFocus = () => {
-		log(`editor ${filename}: got focus`)
-		document.title = humanReadableFilename
-		globals.editorInFocus = editor
-	}
-
-	editor.addEventListener('focus', gotFocus)
-	editor.focus()
+	textWrapper.addEventListener('focus', gotFocus)
+	textWrapper.focus()
 	gotFocus()
-
-	let textWrapper = editor.querySelector('.text-wrapper')
 
 	// tab inserts a tab instead of the usual
 	textWrapper.addEventListener('keydown', function(e) {
@@ -309,7 +313,7 @@ log('text-wrapper keydown', key)
 
 		if (key === 'Tab') {
 			e.preventDefault()
-			insert(content, '\t')
+			actions.insert(content, '\t')
 		}
 
 		if (key === 'ArrowDown') {
@@ -378,9 +382,7 @@ log('text-wrapper keydown', key)
 			input.addEventListener('keydown', (ev) => {
 				log('keydown jee', ev)
 				if (ev.key === 'Enter') {
-log('1')
 					if (input.value) {
-log('1')
 						open(input.value)
 					}
 				}
@@ -405,3 +407,9 @@ log('1')
 
 initClassicEditor('./editor.js', '.editor.classic')
 initNewEditor('./editor.js', '.editor.new')
+
+// Test saving config before reloading
+//window.onbeforeunload = function() {
+//	alert('before unload')
+//fs.writeFileSync('test.txt', 'moi', 'utf8')
+//}
