@@ -479,14 +479,54 @@ log('text-wrapper keydown', key)
 		let MAGIC_Y = 0.5
 
 		let line = Math.round(y / config.fontHeight - MAGIC_Y)
-		let column = Math.round(x / config.fontWidth)
 
+		// TODO check upper boundary too
+		if (line < 0) {
+			line = 0
+		}
+
+		let screenColumnAccurate = x / config.fontWidth
+		let screenColumn = Math.round(x / config.fontWidth)
+
+		let column = getActualCursorColumn(screenColumn, line, screenColumnAccurate)
 		globals.cursor.x.value = column
 		globals.cursor.y.value = line
 	})
 
-	function getActualCursorPos(screenX, line) {
-		// TODO
+
+	// Find out which actual column is nearest to `screenColumnAccurate` (which may be
+	// a non-integer) on screen, taking into account tabs
+	function getActualCursorColumn(screenColumn, line, screenColumnAccurate) {
+		let lineContent = content[line]
+		// visible column
+		let column = 0
+		for (let i = 0; i < lineContent.length; i++) {
+			if (lineContent[i] === '\t') {
+					let missingChars = 4 - column % 4
+					column += missingChars
+
+					// User clicked between two positions separated by a tab characters;
+					// Find out which one is closer to the actually clicked position
+					if (column >= screenColumn) {
+						let previousColumn = column - missingChars
+						let actualDistanceFromPreviousColumn = screenColumnAccurate - previousColumn
+						let actualDistanceToNextColumn = column - screenColumnAccurate
+						if (actualDistanceFromPreviousColumn < actualDistanceToNextColumn) {
+							return i
+						} else {
+							return i + 1
+						}
+					}
+			} else {
+				column++
+			}
+
+			if (column >= screenColumn) {
+				return i + 1
+			}
+		}
+
+		return lineContent.length
 	}
 
 	textWrapper.addEventListener('dblclick', function(e) {
