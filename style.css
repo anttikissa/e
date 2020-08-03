@@ -3,6 +3,8 @@ html, body {
 	height: 100%;
 
 	background: black;
+
+	tab-size: 1;
 }
 
 * {
@@ -21,6 +23,9 @@ html, body {
 	margin: 1px;
 
 
+	/* make the classic editor look a bit different than the new one, just
+	as a reminder */
+	tab-size: 2;
 }
 
 .editor {

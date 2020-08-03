@@ -262,14 +262,22 @@ function initNewEditor(filename, selector) {
 			let lineElement = document.createElement('div')
 			lineElement.className = 'line'
 
+			// Tab calculation
+			let visibleX = 0
+
 			for (let char of line) {
 				let charElement = document.createElement('div')
 
 				charElement.className = 'char'
 
 				if (char === '\t') {
-					char = '    '
+					let missingChars = 4 - visibleX % 4
+
 					charElement.classList.add('tab')
+					charElement.style.width = missingChars + 'ch'
+					visibleX += missingChars
+				} else {
+					visibleX++
 				}
 
 				charElement.textContent = char
