@@ -88,6 +88,29 @@ let globals = {
 	}
 }
 
+// Passed to actions; contains helpers for accessing the text content
+// and editor state
+class Context {
+	constructor(content, cursor) {
+		this.content = content
+		this.cursor = cursor
+		this.line = this.cursor.y.value
+		this.column = this.cursor.x.value
+	}
+
+	get currentLine() {
+		return this.content[this.line]
+	}
+
+	get lineBeforeCursor() {
+		return this.currentLine.substring(0, this.column)
+	}
+
+	get lineAfterCursor() {
+		return this.currentLine.substring(this.column)
+	}
+}
+
 let actions = {
 	cursorDown: () => {
 		globals.cursor.y.value++
@@ -123,7 +146,9 @@ let actions = {
 		globals.fileChangeEvents.value = [lineNumber, lineNumber]
 	},
 
-	insert: (content, character) => {
+	insert: (context, character) => {
+		let content = context.content
+
 		let lineNumber = globals.cursor.y.value
 		let columnNumber = globals.cursor.x.value
 
@@ -345,6 +370,12 @@ function initNewEditor(filename, selector) {
 	textWrapper.focus()
 	gotFocus()
 
+	function action(name, ...args) {
+		let context = new Context(content, globals.cursor)
+		log('action', name, ...args)
+		actions[name](context, ...args)
+	}
+
 	// tab inserts a tab instead of the usual
 	textWrapper.addEventListener('keydown', function(e) {
 		let key = e.key
@@ -382,7 +413,8 @@ log('text-wrapper keydown', key)
 
 		if (key === ' ') {
 			e.preventDefault()
-			actions.insert(content, ' ')
+			action('insert', ' ')
+//			actions.insert(content, ' ')
 		}
 
 		if (key === 'Enter') {
@@ -467,7 +499,8 @@ log('text-wrapper keydown', key)
 	textWrapper.addEventListener('keypress', function(e) {
 		log('keypress', e)
 		if (e.key) {
-			actions.insert(content, e.key)
+			action('insert', e.key)
+//			actions.insert(content, e.key)
 		}
 	})
 
